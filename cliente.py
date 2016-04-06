@@ -1,9 +1,10 @@
 from flask import Flask, request, url_for, render_template
 from flask_restful import Resource, Api, reqparse
+
 import json
 
-import jugador
-import ojeo
+from jugador import Jugador
+from ojeo import Ojeo
 
 
 app = Flask(__name__)
@@ -15,9 +16,6 @@ parser_jugador.add_argument('nombre', type=str, help='Nombre del jugador')
 parser_jugador.add_argument('club', type=str, help='Nombre del club')
 parser_jugador.add_argument('posicion', type=str, help='Posicion del jugador')
 parser_jugador.add_argument('costo', type=int, help='Costo del pase')
-		
-
-# A remover
 
     
     
@@ -28,22 +26,22 @@ def guardar_sqlite(cod_id, jug):
     
 class RecursoJugadores(Resource):
     def get(self):
-        return Jugador.dame_todos()
+        return Jugador.dame_todos_json()
 
 
 class RecursoOjeos(Resource):
     def get(self):
-        return Ojeo.dame_todos()
+        return Ojeo.dame_todos_json()
 
 
 class RecursoJugador(Resource):
     def get(self, id):
-        jug = Persona(id).cargar_bd()
+        jug = Jugador(id).cargar_bd()
         
         if jug:
-            return jug
+            return jug.juga_json()
         else:
-            return None
+            return {}
             
     def post(self, id):
         args = parser_jugador.parse_args()
@@ -51,10 +49,10 @@ class RecursoJugador(Resource):
 
 class RecursoOjeo(Resource):
     def get(self, id):
-        jug = Ojeo(id).cargar_bd()
+        ojo = Ojeo(id).cargar_bd()
         
-        if jug:
-            return jug
+        if ojo:
+            return ojo
         else:
             return None
             
@@ -62,6 +60,19 @@ class RecursoOjeo(Resource):
         args = parser_jugador.parse_args()
 
 
-if __name__ == "__main__":
+
+api.add_resource(RecursoJugadores, '/jugador')
+api.add_resource(RecursoJugador, '/jugador/<int:id>')
+api.add_resource(RecursoOjeos, '/ojeo')
+api.add_resource(RecursoOjeo, '/ojeo/<int:id>')
+
+
+
+def main():
+    Jugador.crear_ejemplos()
+    
     app.debug = True
     app.run()
+
+if __name__ == "__main__":
+    main()

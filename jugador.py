@@ -1,28 +1,36 @@
-
-personas = {
-    0:Jugador("Cebolla", "Independiente", "Volante", 10000000),
-    1:Jugador("Messi", "Barcelona", "Delantero", 80000000),
-    2:Jugador("Robben", "Bayern Munich", "Delantero", 30312424)
-    }
-
+from ojeo import Ojeo
 
 class Jugador:
     CODIGO = 0
+    
+    personas = {
+    }
 
-    def __str__(self):
-        return "Nombre: {}      Club: {}        Posicion: {}        Costo: {}".format( self.nombre, self.club, self.posicion, self.costo )
-        
-    def __repr__(self):
-        return "Nombre: {}      Club: {}".format(self.nombre, self.club)
+    def crear_ejemplos():
+        j1 = Jugador(0,"Cebolla", "Independiente", "Volante", 10000000)
+        j1.guardar_bd()
+        j1 = Jugador(1,"Messi", "Barcelona", "Delantero", 80000000)
+        j1.guardar_bd()
+        j1 = Jugador(2,"Robben", "Bayern Munich", "Delantero", 30312424)
+        j1.guardar_bd()
 
     def dame_todos():
-        return personas
-
+        return Jugador.personas
+        
+    def juga_json(self):
+        return { 'Nombre' : self.nombre, 'Club' : self.club, 'Posicion' : self.posicion, 'Costo' : self.costo }
+        
+    def dame_todos_json():
+        js = {}
+        for k, v in Jugador.personas.items():
+            js[str(k)] = v.juga_json()
+        return js
+            
     def guardar_bd(self):
-        personas[self.codigo] = self
+        Jugador.personas[self.codigo] = self
         
     def cargar_bd(self):
-        return personas.get(self.codigo, None)
+        return Jugador.personas.get(self.codigo, None)
 
     def agregar_ojeo(self, ojo):
         self.ojeos.append(ojo)
@@ -34,3 +42,4 @@ class Jugador:
         self.costo = costo
         self.ojeos = []
         self.codigo = codigo
+        
