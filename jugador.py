@@ -40,6 +40,11 @@ class Jugador:
         
     def cargar_bd(self):
         return Jugador.personas.get(self.codigo, None)
+        
+    def eliminar_bd(self):
+        Ojeo.eliminar_ojeos_jugador(self.codigo)
+    
+        del Jugador.personas[self.codigo]
 
     def agregar_ojeo(self, ojo):
         #self.ojeos.append(ojo)

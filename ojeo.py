@@ -14,6 +14,13 @@ class Ojeo:
     def dame_todos():
         return Ojeo.ojeos
         
+    def eliminar_ojeos_jugador(jid):
+        for k, v in Ojeo.ojeos:
+            if v.jugador.codigo == jid:
+                #del Ojeo.ojeos[k]
+                self.eliminar_bd()
+
+        
     def dame_todos_json_jugador(jid):
         ret = {}
         for k, v in Ojeo.ojeos.items():
@@ -36,6 +43,9 @@ class Ojeo:
         
     def cargar_bd(self):
         return Ojeo.ojeos.get(self.codigo, None)
+        
+    def eliminar_bd(self):
+        del Ojeo.ojeos[self.codigo]
 
     def __init__(self, codigo, jugador=None, fecha="", comentarios=""):
         self.comentarios = comentarios

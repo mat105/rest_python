@@ -21,6 +21,8 @@ parser_ojeo = reqparse.RequestParser()
 parser_ojeo.add_argument('fecha', type=str, help='Fecha del ojeo')
 parser_ojeo.add_argument('comentarios', type=str, help='Comentarios sobre el jugador')
     
+    
+    
 class RecursoJugadores(Resource):
     def get(self):
         return Jugador.dame_todos_json()
@@ -49,6 +51,16 @@ class RecursoJugador(Resource):
             return jug.transformar_json()
         else:
             return {}
+            
+    def delete(self, id):
+        jug = Jugador(id).cargar_bd()
+        
+        if jug:
+            jug.eliminar_bd()
+            return ''
+            
+        return {}
+
 
 class RecursoOjeoEspecifico(Resource):
     def get(self, id):
@@ -59,6 +71,15 @@ class RecursoOjeoEspecifico(Resource):
         else:
             return {}
             
+    def delete(self, id):
+        ojo = Ojeo(id).cargar_bd()
+        
+        if ojo:
+            ojo.eliminar_bd()
+            return '', 204
+            
+        return {}
+
 
 class RecursoJugadorOjeos(Resource):
     def get(self, id):
@@ -98,6 +119,7 @@ def main():
     
     app.debug = True
     app.run()
+
 
 if __name__ == "__main__":
     main()
