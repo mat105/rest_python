@@ -17,16 +17,23 @@ parser_jugador.add_argument('club', type=str, help='Nombre del club')
 parser_jugador.add_argument('posicion', type=str, help='Posicion del jugador')
 parser_jugador.add_argument('costo', type=int, help='Costo del pase')
 
-    
-    
-        
-def guardar_sqlite(cod_id, jug):
-    personas[cod_id] = jug
-    
+parser_ojeo = reqparse.RequestParser()
+parser_ojeo.add_argument('fecha', type=str, help='Fecha del ojeo')
+parser_ojeo.add_argument('comentarios', type=str, help='Comentarios sobre el jugador')
     
 class RecursoJugadores(Resource):
     def get(self):
         return Jugador.dame_todos_json()
+        
+    def post(self):
+        args = parser_jugador.parse_args()
+        tid = Jugador.ultimo_codigo() + 1
+        
+        juga = Jugador( tid, args['nombre'], args['club'], args['posicion'], args['costo'] )
+        juga.guardar_bd()
+        
+        return juga.transformar_json()
+
 
 
 class RecursoOjeos(Resource):
@@ -39,32 +46,50 @@ class RecursoJugador(Resource):
         jug = Jugador(id).cargar_bd()
         
         if jug:
-            return jug.juga_json()
+            return jug.transformar_json()
         else:
             return {}
-            
-    def post(self, id):
-        args = parser_jugador.parse_args()
 
-
-class RecursoOjeo(Resource):
+class RecursoOjeoEspecifico(Resource):
     def get(self, id):
         ojo = Ojeo(id).cargar_bd()
         
         if ojo:
-            return ojo
+            return ojo.transformar_json()
         else:
-            return None
+            return {}
+            
+
+class RecursoJugadorOjeos(Resource):
+    def get(self, id):
+        #jug = Jugador(id).cargar_bd()
+        lis = Ojeo.dame_todos_json_jugador(id)
+        
+        if( lis ):
+            return lis
+        else:
+            return {} # Agregar un error ?
             
     def post(self, id):
-        args = parser_jugador.parse_args()
+        args = parser_ojeo.parse_args()
+        tid = Ojeo.ultimo_codigo() + 1
+        
+        juga = Jugador(id).cargar_bd()
+        
+        if juga:
+            ojo = Ojeo (tid, juga, args['fecha'], args['comentarios'])
+            if ojo:
+                ojo.guardar_bd()
+                return ojo.transformar_json()
 
+        return {}
 
 
 api.add_resource(RecursoJugadores, '/jugador')
 api.add_resource(RecursoJugador, '/jugador/<int:id>')
-api.add_resource(RecursoOjeos, '/ojeo')
-api.add_resource(RecursoOjeo, '/ojeo/<int:id>')
+api.add_resource(RecursoOjeos, '/jugador/ojeo')
+api.add_resource(RecursoOjeoEspecifico, '/jugador/ojeo/<int:id>')
+api.add_resource(RecursoJugadorOjeos, '/jugador/<int:id>/ojeo')
 
 
 

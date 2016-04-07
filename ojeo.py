@@ -5,17 +5,30 @@ class Ojeo:
     ojeos = {
     }
     
+    
+    def ultimo_codigo():
+        if(Ojeo.ojeos):
+            return max(Ojeo.ojeos.keys())
+        return 0
 
     def dame_todos():
         return Ojeo.ojeos
         
-    def ojeo_json(self):
-        return { 'Jugador' : self.juga_json(), 'Fecha' : self.fecha, 'Comentarios' : self.comentarios }
+    def dame_todos_json_jugador(jid):
+        ret = {}
+        for k, v in Ojeo.ojeos.items():
+            if v.jugador.codigo == jid:
+                ret[str(k)] = v.transformar_json()
+        return ret
+            
+        
+    def transformar_json(self):
+        return { 'Jugador' : self.jugador.transformar_json(), 'Fecha' : self.fecha, 'Comentarios' : self.comentarios }
         
     def dame_todos_json():
         js={}
         for k, v in Ojeo.ojeos.items():
-            js[k] = v.ojeo_json()
+            js[str(k)] = v.transformar_json()
         return js
 
     def guardar_bd(self):
@@ -25,7 +38,7 @@ class Ojeo:
         return Ojeo.ojeos.get(self.codigo, None)
 
     def __init__(self, codigo, jugador=None, fecha="", comentarios=""):
-        self.comentarios = [comentarios]
+        self.comentarios = comentarios
         self.fecha = fecha
         self.codigo = Ojeo.CODIGO
         self.jugador = jugador
