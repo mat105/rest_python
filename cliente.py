@@ -22,10 +22,10 @@ parser_ojeo.add_argument('fecha', type=str, help='Fecha del ojeo')
 parser_ojeo.add_argument('comentarios', type=str, help='Comentarios sobre el jugador')
     
     
-    
+#/jugador
 class RecursoJugadores(Resource):
     def get(self):
-        return Jugador.dame_todos_json()
+        return Jugador.dame_todos_json(), 200
         
     def post(self):
         args = parser_jugador.parse_args()
@@ -34,34 +34,44 @@ class RecursoJugadores(Resource):
         juga = Jugador( tid, args['nombre'], args['club'], args['posicion'], args['costo'] )
         juga.guardar_bd()
         
-        return juga.transformar_json()
+        return juga.transformar_json(), 201
 
 
-
+#/jugador/ojeo
 class RecursoOjeos(Resource):
     def get(self):
-        return Ojeo.dame_todos_json()
+        return Ojeo.dame_todos_json(), 200
 
 
+#/jugador/<cod>
 class RecursoJugador(Resource):
+
+    def put(self, id):
+        args = parser_jugador.parse_args()
+        
+        juga = Jugador( id, args['nombre'], args['club'], args['posicion'], args['costo'] )
+        juga.guardar_bd()
+        
+        return juga.transformar_json(), 201
+
     def get(self, id):
         jug = Jugador(id).cargar_bd()
         
         if jug:
-            return jug.transformar_json()
+            return jug.transformar_json(), 200
         else:
-            return {}
+            return {}, 404
             
     def delete(self, id):
         jug = Jugador(id).cargar_bd()
         
         if jug:
             jug.eliminar_bd()
-            return ''
+            return {}, 200
             
-        return {}
+        return {}, 404
 
-
+#/jugador/ojeo/<cod>
 class RecursoOjeoEspecifico(Resource):
     def get(self, id):
         ojo = Ojeo(id).cargar_bd()
@@ -69,18 +79,18 @@ class RecursoOjeoEspecifico(Resource):
         if ojo:
             return ojo.transformar_json()
         else:
-            return {}
+            return {}, 404
             
     def delete(self, id):
         ojo = Ojeo(id).cargar_bd()
         
         if ojo:
             ojo.eliminar_bd()
-            return '', 204
+            return {}, 200
             
-        return {}
+        return {}, 404
 
-
+#/jugador/<cod>/ojeo
 class RecursoJugadorOjeos(Resource):
     def get(self, id):
         #jug = Jugador(id).cargar_bd()
@@ -89,7 +99,7 @@ class RecursoJugadorOjeos(Resource):
         if( lis ):
             return lis
         else:
-            return {} # Agregar un error ?
+            return {}, 404 # Error
             
     def post(self, id):
         args = parser_ojeo.parse_args()
@@ -101,9 +111,9 @@ class RecursoJugadorOjeos(Resource):
             ojo = Ojeo (tid, juga, args['fecha'], args['comentarios'])
             if ojo:
                 ojo.guardar_bd()
-                return ojo.transformar_json()
+                return ojo.transformar_json(), 201
 
-        return {}
+        return {}, 404
 
 
 api.add_resource(RecursoJugadores, '/jugador')

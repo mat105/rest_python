@@ -1,0 +1,18 @@
+EJEMPLOS:
+
+
+POST JUGADOR
+curl http://localhost:5000/jugador --data "nombre=Ribery&club=Bayern&posicion=volante&costo=2200055" -X POST -v
+
+POST OJEO
+curl http://localhost:5000/jugador/1/ojeo --data "fecha=2016/01/02&comentarios=Rapido" -X POST -v
+
+
+DELETE JUGADOR
+curl http://localhost:5000/jugador/0 -X DELETE -v
+
+DELETE OJEO
+curl http://localhost:5000/jugador/ojeo/0 -X DELETE -v
+
+PUT
+curl http://localhost:5000/jugador/0 --data "nombre=Denis&club=Independiente&posicion=Delantero&costo=1200056" -X PUT -v
