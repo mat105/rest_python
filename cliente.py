@@ -125,7 +125,7 @@ api.add_resource(RecursoJugadorOjeos, '/jugador/<int:id>/ojeo')
 
 
 def main():
-    Jugador.crear_ejemplos()
+    #Jugador.crear_ejemplos()
     
     app.debug = True
     app.run()
