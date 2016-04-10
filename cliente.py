@@ -50,7 +50,8 @@ class RecursoJugador(Resource):
         args = parser_jugador.parse_args()
         
         juga = Jugador( id, args['nombre'], args['club'], args['posicion'], args['costo'] )
-        juga.guardar_bd()
+        #juga.guardar_bd() # Agregando esto podria hacer creacion en caso de que no existe y el update no tendria efecto.
+        juga.modificar_bd()
         
         return juga.transformar_json(), 201
 
