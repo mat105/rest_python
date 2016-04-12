@@ -11,6 +11,13 @@ app = Flask(__name__)
 api = Api(app)
 
 
+parser_jugadores_get = reqparse.RequestParser()
+parser_jugadores_get.add_argument('nombre', type=str, help='Nombre del jugador')
+parser_jugadores_get.add_argument('club', type=str, help='Nombre del club')
+parser_jugadores_get.add_argument('posicion', type=str, help='Posicion del jugador')
+parser_jugadores_get.add_argument('orden', type=str, help='Ordenar por cual campo')
+parser_jugadores_get.add_argument('listado', type=str, help='Ordenar DESCendente o ASCendente')
+
 parser_jugador = reqparse.RequestParser()
 parser_jugador.add_argument('nombre', type=str, help='Nombre del jugador')
 parser_jugador.add_argument('club', type=str, help='Nombre del club')
@@ -25,7 +32,18 @@ parser_ojeo.add_argument('comentarios', type=str, help='Comentarios sobre el jug
 #/jugador
 class RecursoJugadores(Resource):
     def get(self):
-        return Jugador.dame_todos_json(), 200
+        args = parser_jugadores_get.parse_args()
+
+        ordenado = args.get( 'orden', None ) # None => Default
+        listado = args.get('listado', None) # None => Default
+        
+        if ordenado and not ordenado in ['nombre', 'club', 'posicion', 'costo']:
+            ordenado = None
+        if listado and not listado in ['asc', 'desc']:
+            listado = None
+
+        return Jugador.query( args.get('nombre', None), args.get('club', None), args.get('posicion', None), ordenado, listado ), 200
+        #Jugador.dame_todos_json(), 200
         
     def post(self):
         args = parser_jugador.parse_args()

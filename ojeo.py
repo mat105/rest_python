@@ -5,9 +5,6 @@ import jugador
 class Ojeo:
     CODIGO = 0
     
-    ojeos = {
-    }
-    
     
     def ultimo_codigo():
         codn = dbacceso.query_db('select max(codigo) as codigo from ojeo', one=True)

@@ -1,12 +1,10 @@
 import ojeo
 
-import dbacceso
+#import dbacceso
+from dbacceso import JugadorDAO
 
 class Jugador:
     CODIGO = 0
-    
-    personas = {
-    }
 
     def crear_ejemplos():
         #dbacceso.insert_db('delete from jugador')
@@ -19,7 +17,7 @@ class Jugador:
         j1.guardar_bd()
 
     def ultimo_codigo():
-        codn = dbacceso.query_db('select max(codigo) as codigo from jugador', one=True)
+        codn = JugadorDAO.instancia().query_ultimo_codigo() #dbacceso.query_db('select max(codigo) as codigo from jugador', one=True)
 
         return codn['codigo'] if codn['codigo'] else 0
 
@@ -27,7 +25,7 @@ class Jugador:
         return ojeo.Ojeo.dame_todos_json_jugador(self.codigo)
 
     def dame_todos():
-        data = dbacceso.query_db( 'select * from jugador' )
+        data = JugadorDAO.query() #dbacceso.query_db( 'select * from jugador' )
         ret = []
         
         for dic in data:
@@ -39,21 +37,29 @@ class Jugador:
         return { "codigo" : self.codigo, "nombre" : self.nombre, "club" : self.club, "posicion" : self.posicion, "costo" : self.costo }
         
     def dame_todos_json():
-        return dbacceso.query_db( 'select * from jugador' )
+        return JugadorDAO.instancia().query()
+        #return dbacceso.query_db( 'select * from jugador' )
+        
+    def query(nombre=None, club=None, posicion=None, ordenado=None, listado=None):
+        return JugadorDAO.instancia().query( nombre, club, posicion, ordenado, listado )
             
     def modificar_bd(self):
-        dbacceso.insert_db( 'update jugador set nombre=?, club=?, posicion=?, costo=? where codigo=?', (self.nombre, self.club, self.posicion, self.costo, self.codigo) )
+        JugadorDAO.instancia().actualizar(codigo, nombre, club, posicion, costo)
+        #dbacceso.insert_db( 'update jugador set nombre=?, club=?, posicion=?, costo=? where codigo=?', (self.nombre, self.club, self.posicion, self.costo, self.codigo) )
             
     def guardar_bd(self):
-        dbacceso.insert_db( 'insert into jugador values (?, ?, ?, ?, ?)', (self.codigo, self.nombre, self.club, self.posicion, self.costo) )
+        JugadorDAO.instancia().insertar( self.codigo, self.nombre, self.club, self.posicion, self.costo )
+        #dbacceso.insert_db( 'insert into jugador values (?, ?, ?, ?, ?)', (self.codigo, self.nombre, self.club, self.posicion, self.costo) )
         
     def cargar_bd(self):
-        data = dbacceso.query_db('select * from jugador where codigo=?', (self.codigo,), one=True)
+        #data = dbacceso.query_db('select * from jugador where codigo=?', (self.codigo,), one=True)
+        data = JugadorDAO.instancia().query_codigo( self.codigo )
         
         return Jugador( data['codigo'], data['nombre'], data['club'], data['posicion'], data['costo'] )
         
     def eliminar_bd(self):
-        dbacceso.insert_db( 'delete from jugador where codigo = ?', (self.codigo,) )
+        JugadorDAO.instancia().eliminar( self.codigo )
+        #dbacceso.insert_db( 'delete from jugador where codigo = ?', (self.codigo,) )
 
     def agregar_ojeo(self, ojo):
         ojo.guardar_bd()
