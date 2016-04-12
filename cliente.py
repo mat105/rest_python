@@ -1,5 +1,9 @@
-from flask import Flask, request, url_for, render_template
+from flask import Flask, request
 from flask_restful import Resource, Api, reqparse
+from flask.ext.compress import Compress
+from flask_restful_swagger import swagger
+
+
 
 import json
 
@@ -8,7 +12,10 @@ from ojeo import Ojeo
 
 
 app = Flask(__name__)
-api = Api(app)
+#api = Api(app)
+api = swagger.docs( Api(app), apiVersion='0.1', api_spec_url='/api/doc' )
+
+compress = Compress()
 
 
 parser_jugadores_get = reqparse.RequestParser()
@@ -31,6 +38,53 @@ parser_ojeo.add_argument('comentarios', type=str, help='Comentarios sobre el jug
     
 #/jugador
 class RecursoJugadores(Resource):
+    "Listar jugadores"
+    @swagger.operation(
+        notes='Listado de jugadores',
+        nickname='get',
+        parameters=[
+            {
+            "name": "nombre",
+            "description": "El nombre por el cual filtrar la lista.",
+            "required": False,
+            "allowMultiple": False,
+            "dataType": 'string',
+            "paramType": "path"
+            },
+            {
+            "name": "club",
+            "description": "El club por el cual filtrar la lista.",
+            "required": False,
+            "allowMultiple": False,
+            "dataType": 'string',
+            "paramType": "path"
+            },
+            {
+            "name": "posicion",
+            "description": "La posicion por la cual filtrar la lista.",
+            "required": False,
+            "allowMultiple": False,
+            "dataType": 'string',
+            "paramType": "path"
+            },
+            {
+            "name": "orden",
+            "description": "El campo por el cual ordenar la lista. [nombre|club|posicion|costo]",
+            "required": False,
+            "allowMultiple": False,
+            "dataType": 'string',
+            "paramType": "path"
+            },
+            {
+            "name": "listado",
+            "description": "La forma de ordenar la lista (ascendente o descendente). [asc|desc]",
+            "required": False,
+            "allowMultiple": False,
+            "dataType": 'string',
+            "paramType": "path"
+            }
+        ]
+    )
     def get(self):
         args = parser_jugadores_get.parse_args()
 
@@ -135,6 +189,7 @@ class RecursoJugadorOjeos(Resource):
         return {}, 404
 
 
+
 api.add_resource(RecursoJugadores, '/jugador')
 api.add_resource(RecursoJugador, '/jugador/<int:id>')
 api.add_resource(RecursoOjeos, '/jugador/ojeo')
@@ -143,10 +198,12 @@ api.add_resource(RecursoJugadorOjeos, '/jugador/<int:id>/ojeo')
 
 
 
+
 def main():
     #Jugador.crear_ejemplos()
     
     app.debug = True
+    compress.init_app(app)
     app.run()
 
 
