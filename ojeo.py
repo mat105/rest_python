@@ -42,13 +42,15 @@ class Ojeo:
         where o.codigo_jugador = j.codigo
         ''')
         
-        ret = []
-        for kdic in data:
-            ret.append( { "codigo":kdic['codigo'], "fecha":kdic['fecha'], "comentarios":kdic['comentarios'], 
-            "jugador":jugador.Jugador(kdic['codigo_jugador'], kdic['nombre'], kdic['club'], kdic['posicion'], kdic['costo']).transformar_json()
-            })
+        return data
         
-        return ret
+        #ret = []
+        #for kdic in data:
+            #ret.append( { "codigo":kdic['codigo'], "fecha":kdic['fecha'], "comentarios":kdic['comentarios'], 
+            #"jugador":jugador.Jugador(kdic['codigo_jugador'], kdic['nombre'], kdic['club'], kdic['posicion'], kdic['costo']).transformar_json()
+            #})
+        
+        #return ret
 
     def guardar_bd(self):
         dbacceso.insert_db( 'insert into ojeo values (?, ?, ?, ?)', (self.codigo, self.jugador.codigo, self.comentarios, self.fecha) )

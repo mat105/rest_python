@@ -1,11 +1,11 @@
 from flask import Flask, request
-from flask_restful import Resource, Api, reqparse
+from flask_restful import Resource, Api, reqparse, fields
 from flask.ext.compress import Compress
 from flask_restful_swagger import swagger
 
 
-
 import json
+import hashlib
 
 from jugador import Jugador
 from ojeo import Ojeo
@@ -17,23 +17,39 @@ api = swagger.docs( Api(app), apiVersion='0.1', api_spec_url='/api/doc' )
 
 compress = Compress()
 
-
+#===
+# Parsers
+#===
 parser_jugadores_get = reqparse.RequestParser()
-parser_jugadores_get.add_argument('nombre', type=str, help='Nombre del jugador')
-parser_jugadores_get.add_argument('club', type=str, help='Nombre del club')
-parser_jugadores_get.add_argument('posicion', type=str, help='Posicion del jugador')
-parser_jugadores_get.add_argument('orden', type=str, help='Ordenar por cual campo')
-parser_jugadores_get.add_argument('listado', type=str, help='Ordenar DESCendente o ASCendente')
 
 parser_jugador = reqparse.RequestParser()
-parser_jugador.add_argument('nombre', type=str, help='Nombre del jugador')
-parser_jugador.add_argument('club', type=str, help='Nombre del club')
-parser_jugador.add_argument('posicion', type=str, help='Posicion del jugador')
-parser_jugador.add_argument('costo', type=int, help='Costo del pase')
 
 parser_ojeo = reqparse.RequestParser()
-parser_ojeo.add_argument('fecha', type=str, help='Fecha del ojeo')
-parser_ojeo.add_argument('comentarios', type=str, help='Comentarios sobre el jugador')
+
+parser_ojeos = reqparse.RequestParser()
+
+parser_ojeos_jugador = reqparse.RequestParser()
+#===
+    
+def iniciar_parsers():
+    parser_jugadores_get.add_argument('nombre', type=str, help='Nombre del jugador')
+    parser_jugadores_get.add_argument('club', type=str, help='Nombre del club')
+    parser_jugadores_get.add_argument('posicion', type=str, help='Posicion del jugador')
+    parser_jugadores_get.add_argument('orden', type=str, help='Ordenar por cual campo')
+    parser_jugadores_get.add_argument('listado', type=str, help='Ordenar DESCendente o ASCendente')
+    parser_jugadores_get.add_argument('hash', type=str, help='Hash del listado cacheado en el cliente (si se tiene)')
+    
+    parser_jugador.add_argument('nombre', type=str, help='Nombre del jugador')
+    parser_jugador.add_argument('club', type=str, help='Nombre del club')
+    parser_jugador.add_argument('posicion', type=str, help='Posicion del jugador')
+    parser_jugador.add_argument('costo', type=int, help='Costo del pase')
+    
+    parser_ojeo.add_argument('fecha', type=str, help='Fecha del ojeo')
+    parser_ojeo.add_argument('comentarios', type=str, help='Comentarios sobre el jugador')
+    
+    parser_ojeos.add_argument('hash', type=str, help='Hash del listado cacheado en el cliente (si se tiene)')
+    
+    parser_ojeos_jugador.add_argument('hash', type=str, help='Hash del listado cacheado en el cliente (si se tiene)')
     
     
 #/jugador
@@ -90,13 +106,19 @@ class RecursoJugadores(Resource):
 
         ordenado = args.get( 'orden', None ) # None => Default
         listado = args.get('listado', None) # None => Default
+        ehash = args.get('hash', None)
         
         if ordenado and not ordenado in ['nombre', 'club', 'posicion', 'costo']:
             ordenado = None
         if listado and not listado in ['asc', 'desc']:
             listado = None
 
-        return Jugador.query( args.get('nombre', None), args.get('club', None), args.get('posicion', None), ordenado, listado ), 200
+        datos = Jugador.query( args.get('nombre', None), args.get('club', None), args.get('posicion', None), ordenado, listado )
+
+        if ehash and ehash == hashlib.sha256( json.dumps( datos, sort_keys=True ).encode() ).hexdigest():
+            return '', 304
+
+        return datos, 200
         #Jugador.dame_todos_json(), 200
         
     def post(self):
@@ -112,7 +134,13 @@ class RecursoJugadores(Resource):
 #/jugador/ojeo
 class RecursoOjeos(Resource):
     def get(self):
-        return Ojeo.dame_todos_json(), 200
+        args = parser_ojeos.parse_args()
+        datos = Ojeo.dame_todos_json()
+        
+        if args.get('hash', None) == hashlib.sha256( json.dumps(datos, sort_keys=True).encode() ).hexdigest():
+            return '', 304
+        
+        return datos, 200
 
 
 #/jugador/<cod>
@@ -166,13 +194,17 @@ class RecursoOjeoEspecifico(Resource):
 #/jugador/<cod>/ojeo
 class RecursoJugadorOjeos(Resource):
     def get(self, id):
+        args = parser_ojeos_jugador.parse_args()
         #jug = Jugador(id).cargar_bd()
         lis = Ojeo.dame_todos_json_jugador(id)
         
         if( lis ):
+            if args.get('hash', None) == hashlib.sha256( json.dumps(lis, sort_keys=True).encode() ).hexdigest():
+                return '', 304
+            
             return lis
         else:
-            return {}, 404 # Error
+            return {}, 404 # Error?. Revisar
             
     def post(self, id):
         args = parser_ojeo.parse_args()
@@ -190,18 +222,20 @@ class RecursoJugadorOjeos(Resource):
 
 
 
-api.add_resource(RecursoJugadores, '/jugador')
-api.add_resource(RecursoJugador, '/jugador/<int:id>')
-api.add_resource(RecursoOjeos, '/jugador/ojeo')
-api.add_resource(RecursoOjeoEspecifico, '/jugador/ojeo/<int:id>')
-api.add_resource(RecursoJugadorOjeos, '/jugador/<int:id>/ojeo')
 
+def iniciar():
+    iniciar_parsers()
 
+    api.add_resource(RecursoJugadores, '/jugador')
+    api.add_resource(RecursoJugador, '/jugador/<int:id>')
+    api.add_resource(RecursoOjeos, '/jugador/ojeo')
+    api.add_resource(RecursoOjeoEspecifico, '/jugador/ojeo/<int:id>')
+    api.add_resource(RecursoJugadorOjeos, '/jugador/<int:id>/ojeo')
 
 
 def main():
     #Jugador.crear_ejemplos()
-    
+    iniciar()
     app.debug = True
     compress.init_app(app)
     app.run()

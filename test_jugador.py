@@ -48,4 +48,5 @@ class TestJugador(unittest.TestCase):
         self.assertEqual( len(retpy) , len_now+1 )
         
 if __name__ == "__main__":
+    cliente.iniciar()
     unittest.main()
