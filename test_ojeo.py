@@ -11,28 +11,11 @@ import jugador
 class TestOjeo(unittest.TestCase):
 
     def setUp(self):
+        dbacceso.activar_testeo()
         self.app = cliente.app.test_client()
         #cliente.Ojeo.crear_ejemplos()
-        
-    def test_ultimo_codigo(self):
-        previo = Ojeo.ultimo_codigo()
+        dbacceso.insert_test_db('delete from jugador')
 
-        Ojeo( Ojeo.ultimo_codigo()+1 , jugador.Jugador(1).cargar_bd(), "2014/01/02", "comentarioxx").guardar_bd()
-        self.assertNotEqual( Ojeo.ultimo_codigo(), previo )
-        
-    def test_guardar_bd(self):
-        tot = Ojeo.dame_todos()
-        len_now = len(tot)
-        
-        Ojeo( Ojeo.ultimo_codigo()+1 , jugador.Jugador(1).cargar_bd(), "2014/01/02", "comentarioxx").guardar_bd()
-        self.assertEqual( len(Ojeo.dame_todos()), len_now+1 )
-        
-    def test_cargar_bd(self):
-        juga = Ojeo( Ojeo.ultimo_codigo()+1 , jugador.Jugador(1).cargar_bd(), "2014/01/02", "comentarioxx")
-        juga.guardar_bd()
-        
-        self.assertEqual( Ojeo( Ojeo.ultimo_codigo() ).cargar_bd().comentarios, juga.comentarios )
-        
         
     def test_get_Ojeos(self):
         return None # --

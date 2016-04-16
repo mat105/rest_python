@@ -19,13 +19,16 @@ class Jugador:
     def ultimo_codigo():
         codn = JugadorDAO.instancia().query_ultimo_codigo() #dbacceso.query_db('select max(codigo) as codigo from jugador', one=True)
 
-        return codn['codigo'] if codn['codigo'] else 0
+        if codn != None and codn['codigo'] != None:
+            return codn['codigo']
+
+        return -1
 
     def dame_ojeos(self):
         return ojeo.Ojeo.dame_todos_json_jugador(self.codigo)
 
     def dame_todos():
-        data = JugadorDAO.query() #dbacceso.query_db( 'select * from jugador' )
+        data = JugadorDAO.instancia().query() #dbacceso.query_db( 'select * from jugador' )
         ret = []
         
         for dic in data:

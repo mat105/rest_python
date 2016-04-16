@@ -2,10 +2,21 @@ import sqlite3
 import json
 
 BASE_RUTA = "juga_base.db"
+TESTEO_RUTA = "juga_base_test.db"
+
+
+BASE_TRABAJO = BASE_RUTA
+
+
+def activar_testeo(test=True):
+    if test:
+        BASE_TRABAJO = TESTEO_RUTA
+    else:
+        BASE_TRABAJO = BASE_RUTA
 
 
 def query_db(query, args=(), one=False):
-    con = sqlite3.connect(BASE_RUTA)
+    con = sqlite3.connect(BASE_TRABAJO)
     cur = con.execute(query, args)
     rv = [dict((cur.description[idx][0], value)
                for idx, value in enumerate(row)) for row in cur.fetchall()]
@@ -14,7 +25,7 @@ def query_db(query, args=(), one=False):
 
 
 def insert_db(query, args=()):
-    con = sqlite3.connect(BASE_RUTA)
+    con = sqlite3.connect(BASE_TRABAJO)
     cur = con.execute(query, args)
     con.commit()
     con.close()
@@ -34,7 +45,7 @@ class JugadorDAO:
         return query_db('select * from jugador order by codigo')
     
     def query_ultimo_codigo(self):
-        query_db('select max(codigo) as codigo from jugador', one=True)
+        return query_db('select max(codigo) as codigo from jugador', one=True)
     
     def query_codigo(self, iden):
         # Devuelve un unico campo (si existe)

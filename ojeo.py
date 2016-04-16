@@ -8,8 +8,11 @@ class Ojeo:
     
     def ultimo_codigo():
         codn = dbacceso.query_db('select max(codigo) as codigo from ojeo', one=True)
+        
+        if codn != None and codn['codigo'] != None:
+            return codn['codigo']
 
-        return codn['codigo'] if codn['codigo'] else 0
+        return -1
 
     def dame_todos():
         data = dbacceso.query_db('select * from ojeo') #Ojeo.ojeos
