@@ -65,7 +65,7 @@ class RecursoJugadores(Resource):
             "required": False,
             "allowMultiple": False,
             "dataType": 'string',
-            "paramType": "path"
+            "paramType": "query"
             },
             {
             "name": "club",
@@ -73,7 +73,7 @@ class RecursoJugadores(Resource):
             "required": False,
             "allowMultiple": False,
             "dataType": 'string',
-            "paramType": "path"
+            "paramType": "query"
             },
             {
             "name": "posicion",
@@ -81,7 +81,7 @@ class RecursoJugadores(Resource):
             "required": False,
             "allowMultiple": False,
             "dataType": 'string',
-            "paramType": "path"
+            "paramType": "query"
             },
             {
             "name": "orden",
@@ -89,7 +89,7 @@ class RecursoJugadores(Resource):
             "required": False,
             "allowMultiple": False,
             "dataType": 'string',
-            "paramType": "path"
+            "paramType": "query"
             },
             {
             "name": "listado",
@@ -97,7 +97,7 @@ class RecursoJugadores(Resource):
             "required": False,
             "allowMultiple": False,
             "dataType": 'string',
-            "paramType": "path"
+            "paramType": "query"
             }
         ]
     )
@@ -121,6 +121,45 @@ class RecursoJugadores(Resource):
         return datos, 200
         #Jugador.dame_todos_json(), 200
         
+    @swagger.operation(
+        notes='Agregar jugador al listado.',
+        nickname='post',
+        parameters=[
+            {
+            "name": "nombre",
+            "description": "El nombre del jugador.",
+            "required": True,
+            "allowMultiple": False,
+            "dataType": 'string',
+            "paramType": "query"
+            },
+            {
+            "name": "club",
+            "description": "El club del jugador.",
+            "required": True,
+            "allowMultiple": False,
+            "dataType": 'string',
+            "paramType": "query"
+            },
+            {
+            "name": "posicion",
+            "description": "La posicion (usual) del jugador.",
+            "required": True,
+            "allowMultiple": False,
+            "dataType": 'string',
+            "paramType": "query"
+            },
+            {
+            "name": "costo",
+            "description": "El costo del jugador.",
+            "required": True,
+            "allowMultiple": False,
+            "dataType": 'double',
+            "paramType": "query"
+            }
+        ]
+    )
+        
     def post(self):
         args = parser_jugador.parse_args()
         tid = Jugador.ultimo_codigo() + 1
@@ -133,6 +172,10 @@ class RecursoJugadores(Resource):
 
 #/jugador/ojeo
 class RecursoOjeos(Resource):
+    @swagger.operation(
+        notes='Listado de ojeos.',
+        nickname='get',
+    )
     def get(self):
         args = parser_ojeos.parse_args()
         datos = Ojeo.dame_todos_json()
@@ -145,7 +188,53 @@ class RecursoOjeos(Resource):
 
 #/jugador/<cod>
 class RecursoJugador(Resource):
-
+    @swagger.operation(
+        notes='Modificar datos del jugador.',
+        nickname='put',
+        parameters=[
+            {
+            "name": "id",
+            "description": "El codigo del jugador.",
+            "required": True,
+            "allowMultiple": False,
+            "dataType": 'integer',
+            "paramType": "path"
+            },
+            {
+            "name": "nombre",
+            "description": "El nombre del jugador.",
+            "required": True,
+            "allowMultiple": False,
+            "dataType": 'string',
+            "paramType": "query"
+            },
+            {
+            "name": "club",
+            "description": "El club del jugador.",
+            "required": True,
+            "allowMultiple": False,
+            "dataType": 'string',
+            "paramType": "query"
+            },
+            {
+            "name": "posicion",
+            "description": "La posicion (usual) del jugador.",
+            "required": True,
+            "allowMultiple": False,
+            "dataType": 'string',
+            "paramType": "query"
+            },
+            {
+            "name": "costo",
+            "description": "El costo del jugador.",
+            "required": True,
+            "allowMultiple": False,
+            "dataType": 'double',
+            "paramType": "query"
+            }
+        ]
+        
+    )
     def put(self, id):
         args = parser_jugador.parse_args()
         
@@ -155,6 +244,22 @@ class RecursoJugador(Resource):
         
         return juga.transformar_json(), 201
 
+    @swagger.operation(
+        notes='Ver informacion del jugador.',
+        nickname='get',
+        parameters = [
+            {
+            "name": "id",
+            "description": "El codigo del jugador.",
+            "required": True,
+            "allowMultiple": False,
+            "dataType": 'integer',
+            "paramType": "path"
+            }
+            
+        ]
+    )
+
     def get(self, id):
         jug = Jugador(id).cargar_bd()
         
@@ -163,6 +268,21 @@ class RecursoJugador(Resource):
         else:
             return {}, 404
             
+    @swagger.operation(
+        notes='Borrar jugador.',
+        nickname='delete',
+        parameters = [
+            {
+            "name": "id",
+            "description": "El codigo del jugador.",
+            "required": True,
+            "allowMultiple": False,
+            "dataType": 'integer',
+            "paramType": "path"
+            }
+            
+        ]
+    )   
     def delete(self, id):
         jug = Jugador(id).cargar_bd()
         
@@ -174,6 +294,21 @@ class RecursoJugador(Resource):
 
 #/jugador/ojeo/<cod>
 class RecursoOjeoEspecifico(Resource):
+    @swagger.operation(
+        notes='Ver informacion del ojeo.',
+        nickname='get',
+        parameters = [
+            {
+            "name": "id",
+            "description": "El codigo del ojeo.",
+            "required": True,
+            "allowMultiple": False,
+            "dataType": 'integer',
+            "paramType": "path"
+            }
+            
+        ]
+    )
     def get(self, id):
         ojo = Ojeo(id).cargar_bd()
         
@@ -182,6 +317,22 @@ class RecursoOjeoEspecifico(Resource):
         else:
             return {}, 404
             
+            
+    @swagger.operation(
+        notes='Borrar ojeo.',
+        nickname='delete',
+        parameters = [
+            {
+            "name": "id",
+            "description": "El codigo del ojeo.",
+            "required": True,
+            "allowMultiple": False,
+            "dataType": 'integer',
+            "paramType": "path"
+            }
+            
+        ]
+    )
     def delete(self, id):
         ojo = Ojeo(id).cargar_bd()
         
@@ -193,6 +344,22 @@ class RecursoOjeoEspecifico(Resource):
 
 #/jugador/<cod>/ojeo
 class RecursoJugadorOjeos(Resource):
+
+    @swagger.operation(
+        notes='Ver ojeos del jugador.',
+        nickname='get',
+        parameters = [
+            {
+            "name": "id",
+            "description": "El codigo del jugador.",
+            "required": True,
+            "allowMultiple": False,
+            "dataType": 'integer',
+            "paramType": "path"
+            }
+            
+        ]
+    )
     def get(self, id):
         args = parser_ojeos_jugador.parse_args()
         #jug = Jugador(id).cargar_bd()
@@ -206,6 +373,37 @@ class RecursoJugadorOjeos(Resource):
         else:
             return {}, 404 # Error?. Revisar
             
+    @swagger.operation(
+        notes='Modificar datos del jugador.',
+        nickname='put',
+        parameters=[
+            {
+            "name": "id",
+            "description": "El codigo del jugador.",
+            "required": True,
+            "allowMultiple": False,
+            "dataType": 'integer',
+            "paramType": "path"
+            },
+            {
+            "name": "fecha",
+            "description": "Fecha del ojeo.",
+            "required": True,
+            "allowMultiple": False,
+            "dataType": 'string',
+            "paramType": "query"
+            },
+            {
+            "name": "comentarios",
+            "description": "Comentarios sobre el jugador.",
+            "required": True,
+            "allowMultiple": False,
+            "dataType": 'string',
+            "paramType": "query"
+            }
+        ]
+        
+    )
     def post(self, id):
         args = parser_ojeo.parse_args()
         tid = Ojeo.ultimo_codigo() + 1
