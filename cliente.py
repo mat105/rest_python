@@ -2,6 +2,10 @@ from flask import Flask, request
 from flask_restful import Resource, Api, reqparse, fields
 from flask.ext.compress import Compress
 from flask_restful_swagger import swagger
+from flask.ext.restful.utils import cors
+
+from functools import update_wrapper
+from datetime import timedelta
 
 
 import json
@@ -11,11 +15,20 @@ from jugador import Jugador
 from ojeo import Ojeo
 
 
+from flask.ext.httpauth import HTTPBasicAuth
+auth = HTTPBasicAuth()
+
+
+
 app = Flask(__name__)
 #api = Api(app)
 api = swagger.docs( Api(app), apiVersion='0.1', api_spec_url='/api/doc' )
 
 compress = Compress()
+
+api.decorators=[cors.crossdomain(origin='*')]
+
+
 
 #===
 # Parsers
@@ -52,9 +65,17 @@ def iniciar_parsers():
     parser_ojeos_jugador.add_argument('hash', type=str, help='Hash del listado cacheado en el cliente (si se tiene)')
     
     
+    
+@auth.verify_password
+def verify_password(username, password):
+    return (username == "pepe" and password == "123")
+    
+
+    
 #/jugador
 class RecursoJugadores(Resource):
     "Listar jugadores"
+    #@auth.login_required
     @swagger.operation(
         notes='Listado de jugadores',
         nickname='get',
@@ -101,6 +122,7 @@ class RecursoJugadores(Resource):
             }
         ]
     )
+    #@cors.crossdomain(origin='*')
     def get(self):
         args = parser_jugadores_get.parse_args()
 
@@ -172,6 +194,7 @@ class RecursoJugadores(Resource):
 
 #/jugador/ojeo
 class RecursoOjeos(Resource):
+    #@auth.login_required
     @swagger.operation(
         notes='Listado de ojeos.',
         nickname='get',
@@ -188,6 +211,8 @@ class RecursoOjeos(Resource):
 
 #/jugador/<cod>
 class RecursoJugador(Resource):
+
+    #@auth.login_required
     @swagger.operation(
         notes='Modificar datos del jugador.',
         nickname='put',
@@ -294,6 +319,7 @@ class RecursoJugador(Resource):
 
 #/jugador/ojeo/<cod>
 class RecursoOjeoEspecifico(Resource):
+    #@auth.login_required
     @swagger.operation(
         notes='Ver informacion del ojeo.',
         nickname='get',

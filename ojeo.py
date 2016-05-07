@@ -39,21 +39,28 @@ class Ojeo:
     def transformar_json(self):
         return { 'jugador' : self.jugador.transformar_json(), 'fecha' : self.fecha, 'comentarios' : self.comentarios }
         
+    # Devuelve los jugadores ojeados
     def dame_todos_json():
-        data = dbacceso.query_db('''select o.codigo, o.codigo_jugador, o.fecha, o.comentarios, j.nombre, j.club, j.posicion, j.costo
+        data = dbacceso.query_db('''select distinct j.codigo, j.nombre
         from ojeo o, jugador j
         where o.codigo_jugador = j.codigo
+        ORDER BY o.fecha
         ''')
         
+        #data = dbacceso.query_db('''select o.codigo as cod, o.codigo_jugador codj, o.fecha, o.comentarios, j.nombre, j.club, j.posicion, j.costo
+        #from ojeo o, jugador j
+        #where o.codigo_jugador = j.codigo
+        #ORDER BY o.fecha
+        #''')
+        
+        #ret = {}
+        
+        #for x in range(len(data)):
+            #data[x] = { "codigo":data[x]['cod'], "fecha":data[x]['fecha'], "jugador":{"codigo_jugador":data[x]['codj'],"nombre":data[x]['nombre'],
+             #"#club":data[x]['club'], "posicion":data[x]['posicion'], }, "comentarios":data[x]['comentarios'] }
+        
         return data
-        
-        #ret = []
-        #for kdic in data:
-            #ret.append( { "codigo":kdic['codigo'], "fecha":kdic['fecha'], "comentarios":kdic['comentarios'], 
-            #"jugador":jugador.Jugador(kdic['codigo_jugador'], kdic['nombre'], kdic['club'], kdic['posicion'], kdic['costo']).transformar_json()
-            #})
-        
-        #return ret
+
 
     def guardar_bd(self):
         dbacceso.insert_db( 'insert into ojeo values (?, ?, ?, ?)', (self.codigo, self.jugador.codigo, self.comentarios, self.fecha) )
