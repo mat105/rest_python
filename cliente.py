@@ -26,7 +26,16 @@ api = swagger.docs( Api(app), apiVersion='0.1', api_spec_url='/api/doc' )
 
 compress = Compress()
 
-api.decorators=[cors.crossdomain(origin='*')]
+#api.decorators=[cors.crossdomain(origin='*')]
+
+
+# Necesario para cross-domain.
+@app.after_request
+def after_request(response):
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
+    response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE')
+    return response
 
 
 
@@ -75,7 +84,7 @@ def verify_password(username, password):
 #/jugador
 class RecursoJugadores(Resource):
     "Listar jugadores"
-    #@auth.login_required
+    @auth.login_required
     @swagger.operation(
         notes='Listado de jugadores',
         nickname='get',
@@ -194,11 +203,15 @@ class RecursoJugadores(Resource):
 
 #/jugador/ojeo
 class RecursoOjeos(Resource):
-    #@auth.login_required
+    @auth.login_required
     @swagger.operation(
         notes='Listado de ojeos.',
         nickname='get',
     )
+    
+    def options(self):
+        return {}, 200
+    
     def get(self):
         args = parser_ojeos.parse_args()
         datos = Ojeo.dame_todos_json()
@@ -212,7 +225,7 @@ class RecursoOjeos(Resource):
 #/jugador/<cod>
 class RecursoJugador(Resource):
 
-    #@auth.login_required
+    @auth.login_required
     @swagger.operation(
         notes='Modificar datos del jugador.',
         nickname='put',
@@ -319,7 +332,7 @@ class RecursoJugador(Resource):
 
 #/jugador/ojeo/<cod>
 class RecursoOjeoEspecifico(Resource):
-    #@auth.login_required
+    @auth.login_required
     @swagger.operation(
         notes='Ver informacion del ojeo.',
         nickname='get',
@@ -371,6 +384,7 @@ class RecursoOjeoEspecifico(Resource):
 #/jugador/<cod>/ojeo
 class RecursoJugadorOjeos(Resource):
 
+    @auth.login_required
     @swagger.operation(
         notes='Ver ojeos del jugador.',
         nickname='get',
