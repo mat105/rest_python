@@ -16,8 +16,15 @@ from ojeo import Ojeo
 
 
 from flask.ext.httpauth import HTTPBasicAuth
+
+
+from itsdangerous import (TimedJSONWebSignatureSerializer as Serializer, BadSignature, SignatureExpired)
+
+#=========================================================
 auth = HTTPBasicAuth()
 
+
+#=========================================================
 
 
 app = Flask(__name__)
@@ -29,6 +36,11 @@ compress = Compress()
 #api.decorators=[cors.crossdomain(origin='*')]
 
 
+
+
+#=========================================================
+
+
 # Necesario para cross-domain.
 @app.after_request
 def after_request(response):
@@ -36,6 +48,43 @@ def after_request(response):
     response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
     response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE')
     return response
+
+
+
+@app.route('/login', methods=['POST'])
+def login():
+    usu = request.form['usuario']
+    contra = request.form['codigo']
+    
+    if(verify_password(usu, contra)):
+        return json.dumps({'token':passes[usu]['token']}), 200
+        
+    return 'Datos erroneos', 500
+
+
+#=========================================================
+
+
+passes = { 'pepe':{'pwd':'123', 'token':'abcd'} }
+
+
+@auth.verify_password
+def verify_password(username, password):
+    for k, v in passes.items():
+        if v['token'] == username:
+            return True
+            
+    
+            
+    return ( (username in passes) and passes[username]['pwd'] == password)
+    #return  ( (username in passes) and passes[username]['pwd'] == password)
+    
+
+
+
+#=========================================================
+
+
 
 
 
@@ -72,13 +121,7 @@ def iniciar_parsers():
     parser_ojeos.add_argument('hash', type=str, help='Hash del listado cacheado en el cliente (si se tiene)')
     
     parser_ojeos_jugador.add_argument('hash', type=str, help='Hash del listado cacheado en el cliente (si se tiene)')
-    
-    
-    
-@auth.verify_password
-def verify_password(username, password):
-    return (username == "pepe" and password == "123")
-    
+
 
     
 #/jugador
